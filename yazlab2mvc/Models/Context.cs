@@ -2,30 +2,29 @@
 
 namespace yazlab2mvc.Models
 {
-    public class Context:DbContext 
+    public class Context : DbContext
     {
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer("server=DIDIM\\SQLEXPRESS; database=dbyazlab2; integrated security=true;TrustServerCertificate = True;");
-        }
+        // Constructor (Yapıcı) method
+        public Context(DbContextOptions<Context> options) : base(options) { }
 
+        // DbSet Properties
         public DbSet<Kullanicilar> Kullanicilar { get; set; }
         public DbSet<Etkinlikler> Etkinlikler { get; set; }
         public DbSet<Katilimcilar> Katilimcilar { get; set; }
         public DbSet<Mesajlar> Mesajlar { get; set; }
         public DbSet<Puanlar> Puanlar { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Birleşik anahtarları belirtin
+            // Composite Keys (Birleşik Anahtarlar)
             modelBuilder.Entity<Katilimcilar>()
                 .HasKey(k => new { k.KullaniciID, k.EtkinlikID });
 
             modelBuilder.Entity<Puanlar>()
                 .HasKey(p => new { p.KullaniciID, p.KazanilanTarih });
 
-            // Kullanıcı-Gönderilen ve Alınan Mesajlar ilişkisi
+            // Relationships and Constraints
+            // Mesajlar ve Kullanıcılar (Gönderici ve Alıcı) arasında ilişkiler
             modelBuilder.Entity<Mesajlar>()
                 .HasOne(m => m.Gonderici)
                 .WithMany(k => k.GonderilenMesajlar)
@@ -38,12 +37,11 @@ namespace yazlab2mvc.Models
                 .HasForeignKey(m => m.AliciID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Etkinlik-Mesajlar ilişkisi
+            // Mesajlar ve Etkinlikler arasında ilişki
             modelBuilder.Entity<Mesajlar>()
                 .HasOne(m => m.Etkinlik)
                 .WithMany(e => e.Mesajlar)
                 .HasForeignKey(m => m.EtkinlikID);
         }
-
     }
 }

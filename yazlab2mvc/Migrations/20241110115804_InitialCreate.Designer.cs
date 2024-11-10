@@ -12,8 +12,8 @@ using yazlab2mvc.Models;
 namespace yazlab2mvc.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20241110103419_deneme2")]
-    partial class deneme2
+    [Migration("20241110115804_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
