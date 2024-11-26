@@ -1,0 +1,115 @@
+﻿@model List<yazlab2mvc.Models.Etkinlikler>
+
+<h2>Mevcut Etkinlikler</h2>
+
+@if (Model != null && Model.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Etkinlik Adı</th>
+                <th>Etkinlik Tarihi</th>
+                <th>Etkinlik Saati</th>
+                <th>Konum</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var etkinlik in Model)
+            {
+                <tr>
+                    <td>@etkinlik.EtkinlikAdi</td>
+                    <td>@etkinlik.Tarih.ToString("dd MMMM yyyy")</td>
+                    <td>@etkinlik.Saat.ToString(@"hh\:mm")</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(etkinlik.Konum))
+                        {
+                            <span>@etkinlik.Konum</span>
+                        }
+                        else
+                        {
+                            <span>Konum bilgisi mevcut değil</span>
+                        }
+                    </td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="toggleMessages(@etkinlik.ID)">Mesajları Görüntüle</button>
+                    </td>
+                </tr>
+                <tr id="message-box-@etkinlik.ID" style="display: none;">
+                    <td colspan="5">
+                        <div>
+                            <h4>Mesajlar</h4>
+                            <div id="messages-@etkinlik.ID">
+                                <p>Mesajlar yükleniyor...</p>
+                            </div>
+                            <form id="message-form-@etkinlik.ID" onsubmit="sendMessage(event, @etkinlik.ID)">
+                                <textarea id="message-input-@etkinlik.ID" class="form-control" placeholder="Mesajınızı yazın"></textarea>
+                                <button type="submit" class="btn btn-primary mt-2">Gönder</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            <script>
+                // Mesaj kutusunu açıp kapama
+                function toggleMessages(etkinlikID) {
+                    const messageBox = document.getElementById(`message-box-${etkinlikID}`);
+                    const messagesContainer = document.getElementById(`messages-${etkinlikID}`);
+                    if (messageBox.style.display === "none") {
+                        messageBox.style.display = "table-row";
+                        // Mesajları yükle
+                        fetch(`/Mesaj/MesajlariGetir?etkinlikID=${etkinlikID}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                messagesContainer.innerHTML = data.map(msg => `
+                                                        <div>
+                                                            <strong>${msg.kullaniciAdi}:</strong> ${msg.mesajMetni}
+                                                            <span class="text-muted" style="float: right;">${new Date(msg.gonderimZamani).toLocaleString()}</span>
+                                                        </div>
+                                                    `).join("");
+                            });
+                    } else {
+                        messageBox.style.display = "none";
+                    }
+                }
+
+                // Mesaj gönderme
+                function sendMessage(event, etkinlikID) {
+                    event.preventDefault(); // Formun sayfa yenilemesini engeller
+                    const messageInput = document.getElementById(`message-input-${etkinlikID}`);
+                    const messageText = messageInput.value.trim();
+                    if (!messageText) {
+                        alert("Mesaj boş olamaz!");
+                        return;
+                    }
+
+                    fetch(`/Mesaj/MesajGonder`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            etkinlikID: etkinlikID,
+                            mesajMetni: messageText
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                messageInput.value = ""; // Mesaj kutusunu temizle
+                                toggleMessages(etkinlikID); // Mesajları tekrar yükle
+                            } else {
+                                alert(data.message); // Hata mesajını göster
+                            }
+                        })
+                        .catch(error => alert("Mesaj gönderilirken bir hata oluştu: " + error));
+                }
+            </script>
+
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Şu anda görüntülenebilecek etkinlik yok.</p>
+}

@@ -4,10 +4,16 @@ namespace yazlab2mvc.Models
 {
     public class Context : DbContext
     {
-        // Constructor (Yapıcı) method
         public Context(DbContextOptions<Context> options) : base(options) { }
 
-        // DbSet Properties
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer("server=DIDIM\\SQLEXPRESS; database=dbyazlab2; integrated security=true;TrustServerCertificate = True;");
+            }
+        }
+
         public DbSet<Kullanicilar> Kullanicilar { get; set; }
         public DbSet<Etkinlikler> Etkinlikler { get; set; }
         public DbSet<Katilimcilar> Katilimcilar { get; set; }
@@ -16,15 +22,14 @@ namespace yazlab2mvc.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Composite Keys (Birleşik Anahtarlar)
+            // Birleşik anahtarları belirtin
             modelBuilder.Entity<Katilimcilar>()
                 .HasKey(k => new { k.KullaniciID, k.EtkinlikID });
 
             modelBuilder.Entity<Puanlar>()
                 .HasKey(p => new { p.KullaniciID, p.KazanilanTarih });
 
-            // Relationships and Constraints
-            // Mesajlar ve Kullanıcılar (Gönderici ve Alıcı) arasında ilişkiler
+            // Kullanıcı-Gönderilen ve Alınan Mesajlar ilişkisi
             modelBuilder.Entity<Mesajlar>()
                 .HasOne(m => m.Gonderici)
                 .WithMany(k => k.GonderilenMesajlar)
@@ -37,11 +42,21 @@ namespace yazlab2mvc.Models
                 .HasForeignKey(m => m.AliciID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Mesajlar ve Etkinlikler arasında ilişki
+            // Etkinlik-Mesajlar ilişkisi
             modelBuilder.Entity<Mesajlar>()
                 .HasOne(m => m.Etkinlik)
                 .WithMany(e => e.Mesajlar)
                 .HasForeignKey(m => m.EtkinlikID);
+
+          
+
+            modelBuilder.Entity<Etkinlikler>()
+    .HasOne(e => e.OlusturanKullanici)
+    .WithMany(u => u.OlusturduguEtkinlikler)
+    .HasForeignKey(e => e.OlusturanKullaniciID)
+    .OnDelete(DeleteBehavior.SetNull); // Veya .OnDelete(DeleteBehavior.NoAction)
+
+
         }
     }
 }

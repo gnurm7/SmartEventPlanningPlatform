@@ -12,8 +12,8 @@ using yazlab2mvc.Models;
 namespace yazlab2mvc.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20241110115804_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20241124113115_UpdateCascadeBehavior")]
+    partial class UpdateCascadeBehavior
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,6 +52,9 @@ namespace yazlab2mvc.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("OlusturanKullaniciID")
+                        .HasColumnType("int");
+
                     b.Property<TimeSpan>("Saat")
                         .HasColumnType("time");
 
@@ -59,6 +62,8 @@ namespace yazlab2mvc.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("OlusturanKullaniciID");
 
                     b.ToTable("Etkinlikler");
                 });
@@ -189,6 +194,17 @@ namespace yazlab2mvc.Migrations
                     b.ToTable("Puanlar");
                 });
 
+            modelBuilder.Entity("yazlab2mvc.Models.Etkinlikler", b =>
+                {
+                    b.HasOne("yazlab2mvc.Models.Kullanicilar", "OlusturanKullanici")
+                        .WithMany("OlusturduguEtkinlikler")
+                        .HasForeignKey("OlusturanKullaniciID")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
+
+                    b.Navigation("OlusturanKullanici");
+                });
+
             modelBuilder.Entity("yazlab2mvc.Models.Katilimcilar", b =>
                 {
                     b.HasOne("yazlab2mvc.Models.Etkinlikler", "Etkinlik")
@@ -260,6 +276,8 @@ namespace yazlab2mvc.Migrations
                     b.Navigation("GonderilenMesajlar");
 
                     b.Navigation("KatildigiEtkinlikler");
+
+                    b.Navigation("OlusturduguEtkinlikler");
 
                     b.Navigation("Puanlar");
                 });
