@@ -6,30 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace yazlab2mvc.Migrations
 {
     /// <inheritdoc />
-    public partial class deneme2 : Migration
+    public partial class yazlab2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Etkinlikler",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    EtkinlikAdi = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Aciklama = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Tarih = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Saat = table.Column<TimeSpan>(type: "time", nullable: false),
-                    EtkinlikSuresi = table.Column<TimeSpan>(type: "time", nullable: false),
-                    Konum = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Kategori = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Etkinlikler", x => x.ID);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Kullanicilar",
                 columns: table => new
@@ -51,6 +32,51 @@ namespace yazlab2mvc.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Kullanicilar", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Etkinlikler",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EtkinlikAdi = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Aciklama = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Tarih = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Saat = table.Column<TimeSpan>(type: "time", nullable: false),
+                    EtkinlikSuresi = table.Column<TimeSpan>(type: "time", nullable: false),
+                    Konum = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Kategori = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OlusturanKullaniciID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Etkinlikler", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Etkinlikler_Kullanicilar_OlusturanKullaniciID",
+                        column: x => x.OlusturanKullaniciID,
+                        principalTable: "Kullanicilar",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Puanlar",
+                columns: table => new
+                {
+                    KullaniciID = table.Column<int>(type: "int", nullable: false),
+                    KazanilanTarih = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Puan = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Puanlar", x => new { x.KullaniciID, x.KazanilanTarih });
+                    table.ForeignKey(
+                        name: "FK_Puanlar_Kullanicilar_KullaniciID",
+                        column: x => x.KullaniciID,
+                        principalTable: "Kullanicilar",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -112,24 +138,10 @@ namespace yazlab2mvc.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Puanlar",
-                columns: table => new
-                {
-                    KullaniciID = table.Column<int>(type: "int", nullable: false),
-                    KazanilanTarih = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Puan = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Puanlar", x => new { x.KullaniciID, x.KazanilanTarih });
-                    table.ForeignKey(
-                        name: "FK_Puanlar_Kullanicilar_KullaniciID",
-                        column: x => x.KullaniciID,
-                        principalTable: "Kullanicilar",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.CreateIndex(
+                name: "IX_Etkinlikler_OlusturanKullaniciID",
+                table: "Etkinlikler",
+                column: "OlusturanKullaniciID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Katilimcilar_EtkinlikID",

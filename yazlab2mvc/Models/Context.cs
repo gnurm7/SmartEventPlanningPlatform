@@ -10,7 +10,7 @@ namespace yazlab2mvc.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("server=DIDIM\\SQLEXPRESS; database=dbyazlab2; integrated security=true;TrustServerCertificate = True;");
+                optionsBuilder.UseSqlServer("server=DESKTOP-PMBMQKM\\SQLEXPRESS; database=yazlab2; integrated security=true;TrustServerCertificate = True;");
             }
         }
 
