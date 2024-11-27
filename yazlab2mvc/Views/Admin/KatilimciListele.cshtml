@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Katılımcılar";
+}
+
+<h2>Katılımcılar</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Kullanıcı Adı</th>
+            <th>Etkinlik Adı</th>
+            <th>Durum</th>
+            <th>İşlem</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var katilimci in Model)
+        {
+            <tr>
+                <td>@katilimci.Kullanici.KullaniciAdi</td>
+                <td>@katilimci.Etkinlik.EtkinlikAdi</td>
+                <td>@katilimci.KatilimDurumu</td>
+                <td>
+                    <form method="post" action="@Url.Action("KatilimciDurumGuncelle", "Admin")">
+                        <input type="hidden" name="kullaniciID" value="@katilimci.KullaniciID" />
+                        <input type="hidden" name="etkinlikID" value="@katilimci.EtkinlikID" />
+                        <select name="yeniDurum">
+                            <text>selected</text> }>Onaylı
+                            <text>selected</text> }>Reddedildi
+                            <text>selected</text> }>Beklemede
+                        </select>
+                        <button type="submit">Durumu Güncelle</button>
+                    </form>
+
+                    <form method="post" action="@Url.Action("KatilimciSil", "Admin")">
+                        <input type="hidden" name="kullaniciID" value="@katilimci.KullaniciID" />
+                        <input type="hidden" name="etkinlikID" value="@katilimci.EtkinlikID" />
+                        <button type="submit">Sil</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

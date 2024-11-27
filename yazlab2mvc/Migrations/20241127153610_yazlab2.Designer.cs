@@ -12,8 +12,8 @@ using yazlab2mvc.Models;
 namespace yazlab2mvc.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20241124113115_UpdateCascadeBehavior")]
-    partial class UpdateCascadeBehavior
+    [Migration("20241127153610_yazlab2")]
+    partial class yazlab2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,6 +38,10 @@ namespace yazlab2mvc.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EtkinlikAdi")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EtkinlikDurumu")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

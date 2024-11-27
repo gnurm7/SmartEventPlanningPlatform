@@ -22,6 +22,8 @@ namespace yazlab2mvc.Models
         public TimeSpan Saat { get; set; }
 
         public TimeSpan EtkinlikSuresi { get; set; }
+
+        public string EtkinlikDurumu { get; set; }
         public string Konum { get; set; }
         public string Kategori { get; set; }
 

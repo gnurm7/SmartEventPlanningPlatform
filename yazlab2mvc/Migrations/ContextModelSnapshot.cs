@@ -38,6 +38,10 @@ namespace yazlab2mvc.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("EtkinlikDurumu")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<TimeSpan>("EtkinlikSuresi")
                         .HasColumnType("time");
 

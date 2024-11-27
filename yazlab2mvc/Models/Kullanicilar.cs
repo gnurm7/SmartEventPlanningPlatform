@@ -28,7 +28,7 @@ namespace yazlab2mvc.Models
         [Required(ErrorMessage = "Doğum tarihi gereklidir.")]
         [DataType(DataType.Date)]
         public DateTime DogumTarihi { get; set; }
-
+        
         public string Cinsiyet { get; set; }
         public string TelefonNumarasi { get; set; }
         public string ProfilFotografi { get; set; }
