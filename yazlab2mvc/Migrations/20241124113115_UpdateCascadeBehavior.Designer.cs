@@ -12,8 +12,8 @@ using yazlab2mvc.Models;
 namespace yazlab2mvc.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20241126172429_yazlab2")]
-    partial class yazlab2
+    [Migration("20241124113115_UpdateCascadeBehavior")]
+    partial class UpdateCascadeBehavior
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
