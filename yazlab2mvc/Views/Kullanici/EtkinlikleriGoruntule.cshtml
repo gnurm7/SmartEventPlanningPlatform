@@ -1,48 +1,163 @@
 ﻿@model List<yazlab2mvc.Models.Etkinlikler>
 
+<h2>@ViewBag.KullaniciKonum</h2>
 <h2>Katılabileceğiniz Etkinlikler</h2>
+
+<div id="map" style="height: 500px; width: 100%;"></div>
 
 @if (Model != null && Model.Count > 0)
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Etkinlik Adı</th>
-                <th>Etkinlik Tarihi</th>
-                <th>Etkinlik Saati</th>
-                <th>Konum</th>
-                <th>İşlem</th>
-            </tr>
-        </thead>
-        <tbody>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Etkinlik Adı</th>
+                    <th>Etkinlik Tarihi</th>
+                    <th>Etkinlik Saati</th>
+                    <th>Konum</th>
+                    <th>İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
             @foreach (var etkinlik in Model)
             {
-                <tr>
-                    <td>@etkinlik.EtkinlikAdi</td>
-                    <td>@etkinlik.Tarih.ToString("dd MMMM yyyy")</td>
-                    <td>@etkinlik.Saat.ToString(@"hh\:mm")</td>
-                    <td>
-                        @if (!string.IsNullOrEmpty(etkinlik.Konum))
-                        {
-                            <span>@etkinlik.Konum</span>
-                        }
-                        else
-                        {
-                            <span>Konum bilgisi mevcut değil</span>
-                        }
-                    </td>
-                    <td>
-                        <form method="post" action="@Url.Action("EtkinligeKatil", "Kullanici")">
-                            <input type="hidden" name="etkinlikID" value="@etkinlik.ID" />
-                            <button type="submit" class="btn btn-primary">Etkinliğe Katıl</button>
-                        </form>
-                    </td>
-                </tr>
+                        <tr>
+                            <td>@etkinlik.EtkinlikAdi</td>
+                            <td>@etkinlik.Tarih.ToString("dd MMMM yyyy")</td>
+                            <td>@etkinlik.Saat.ToString(@"hh\:mm")</td>
+                            <td>@etkinlik.Konum</td>
+                            <td>
+                                <form method="post" action="@Url.Action("EtkinligeKatil", "Kullanici")">
+                                    <input type="hidden" name="etkinlikID" value="@etkinlik.ID" />
+                                    <button type="submit" class="btn btn-primary">Etkinliğe Katıl</button>
+                                </form>
+                            </td>
+                        </tr>
             }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
 }
-else
-{
-    <p>Katılabileceğiniz etkinlik bulunmamaktadır.</p>
-}
+<script>
+    const kullaniciKonum = "@ViewBag.KullaniciKonum";
+    // Razor'dan gelen Model verisini JavaScript'e geçiriyoruz
+    const etkinlikler = @Html.Raw(Json.Serialize(Model.Select(e => new { e.EtkinlikAdi, e.Konum })));
+
+    function initMap() {
+        // Haritanın başlangıç konumu ve ayarları
+        const map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 41.0082, lng: 28.9784 }, // İstanbul'u merkez olarak ayarladık
+            zoom: 10,
+        });
+
+        // Kullanıcı konumunu haritada gösteren marker
+        if (kullaniciKonum) {
+            const [userLat, userLng] = kullaniciKonum.split(',').map(Number);
+            const userMarker = new google.maps.Marker({
+                position: { lat: userLat, lng: userLng },
+                map: map,
+                icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", // Kullanıcı konumunu farklı renkte göster
+                title: "Kullanıcı Konumu",
+            });
+        }
+
+        // Her bir etkinlik için marker oluştur
+        (etkinlikler.$values).forEach(etkinlik => {
+            if (etkinlik.konum) {
+                // Konumu enlem ve boylam olarak ayır
+                const [lat, lng] = etkinlik.konum.split(',').map(Number);
+
+                // Marker oluştur
+                const marker = new google.maps.Marker({
+                    position: { lat: lat, lng: lng },
+                    map: map,
+                    title: etkinlik.EtkinlikAdi, // Marker başlığı
+                });
+                console.log(etkinlikler);
+                console.log(etkinlik);
+                console.log(etkinlik.EtkinlikAdi);
+                console.log(etkinlik.etkinlikAdi);//bu doğru
+                console.log(etkinlik.konum);
+                // Marker üzerine bilgi penceresi ekleyelim
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `<div><strong>${etkinlik.etkinlikAdi}</strong></div>`,
+                });
+
+                // Marker'a tıklandığında bilgi penceresini aç
+                marker.addListener("click", () => {
+                    infoWindow.open(map, marker);
+                });
+
+                // Kullanıcı konumu ve etkinlik arasındaki mesafeyi hesapla
+                if (kullaniciKonum) {
+                    const [userLat, userLng] = kullaniciKonum.split(',').map(Number);
+                    const userLatLng = new google.maps.LatLng(userLat, userLng);
+                    const etkinlikLatLng = new google.maps.LatLng(lat, lng);
+
+                    // Mesafe hesapla (kilometre cinsinden)
+                    const distance = google.maps.geometry.spherical.computeDistanceBetween(userLatLng, etkinlikLatLng) / 1000; // km cinsinden mesafe
+
+                    // Etkinlik üzerine mesafeyi ekleyelim
+                    infoWindow.setContent(`<div><strong>${etkinlik.etkinlikAdi}</strong><br>Mesafe: ${distance.toFixed(2)} km</div>`);
+
+                    // Mor çizgiyi oluştur
+                    const path = [userLatLng, etkinlikLatLng]; // Başlangıç ve bitiş noktalarını içeren yol
+                    const polyline = new google.maps.Polyline({
+                        path: path,
+                        geodesic: true,
+                        strokeColor: '#800080', // Mor renk
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2
+                    });
+                    polyline.setMap(map); // Çizgiyi haritaya ekle
+                }
+
+                // Rota hesaplama işlemi
+                if (kullaniciKonum) {
+                    const [userLat, userLng] = kullaniciKonum.split(',').map(Number);
+                    const directionsService = new google.maps.DirectionsService();
+                    const directionsRenderer = new google.maps.DirectionsRenderer();
+                    directionsRenderer.setMap(map); // Harita üzerinde rota gösterme
+
+                    // Kullanıcı ve etkinlik konumları
+                    const userLatLng = new google.maps.LatLng(userLat, userLng);
+                    const etkinlikLatLng = new google.maps.LatLng(lat, lng);
+
+                    // Farklı ulaşım türleri için rotalar
+                    const travelModes = ['DRIVING', 'BICYCLING', 'WALKING']; // Araç, bisiklet, yürüyüş
+
+                    travelModes.forEach(mode => {
+                        const request = {
+                            origin: userLatLng,
+                            destination: etkinlikLatLng,
+                            travelMode: mode, // Ulaşım türü
+                        };
+
+                        directionsService.route(request, (result, status) => {
+                            if (status === 'OK') {
+                                directionsRenderer.setDirections(result);
+                                const route = result.routes[0];
+                                const duration = route.legs[0].duration.text;
+                                const distance = route.legs[0].distance.text;
+
+                                console.log(`${mode} ile Rota:`);
+                                console.log(`Mesafe: ${distance}, Süre: ${duration}`);
+                            } else {
+                                console.error(`Rota hesaplanamadı: ${status}`);
+                                if (status === google.maps.DirectionsStatus.ZERO_RESULTS) {
+                                    console.error("Bu güzergah için bisiklet rotası bulunamadı.");
+                                }
+                                console.log(result);  // Yanıt detaylarını yazdır
+                            }
+                        });
+
+                    });
+                }
+            }
+        });
+    }
+</script>
+
+
+<!-- Google Maps API  bulamadığı zaman library eklemeyi unutma-->
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFXDO-G5xsoSOXpV0F-MLfOZ6_qBXHCFw&libraries=geometry&callback=initMap" async defer>
+</script>

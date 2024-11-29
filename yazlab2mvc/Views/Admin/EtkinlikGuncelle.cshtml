@@ -1,0 +1,49 @@
+﻿@model yazlab2mvc.Models.Etkinlikler
+
+@{
+    ViewData["Title"] = "Etkinlik Güncelle";
+}
+<h2>@ViewBag.m1</h2>
+
+
+<h2>Etkinlik Güncelle</h2>
+
+<form method="post" action="/Admin/EtkinlikGuncelle">
+    @Html.AntiForgeryToken()  <!-- CSRF token ekleniyor -->
+    <div class="form-group">
+        <label for="EtkinlikAdi">Etkinlik Adı</label>
+        <input type="text" id="EtkinlikAdi" name="EtkinlikAdi" class="form-control" value="@Model.EtkinlikAdi" required />
+        @if (ViewData.ModelState["EtkinlikAdi"]?.Errors.Count > 0)
+        {
+            <span class="text-danger">@ViewData.ModelState["EtkinlikAdi"]?.Errors[0]?.ErrorMessage</span>
+        }
+    </div>
+    <input id="ID" name="ID" type="hidden" value="@Model.ID">/>
+    
+    <div class="form-group">
+        <label for="Aciklama">Açıklama</label>
+        <textarea id="Aciklama" name="Aciklama" class="form-control">@Model.Aciklama</textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="Tarih">Etkinlik Tarihi</label>
+        <input type="date" id="Tarih" name="Tarih" class="form-control" value="@Model.Tarih.ToString("yyyy-MM-dd")" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Saat">Etkinlik Saati</label>
+        <input type="time" id="Saat" name="Saat" class="form-control" value="@Model.Saat.ToString(@"hh\:mm")" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Konum">Konum</label>
+        <input type="text" id="Konum" name="Konum" class="form-control" value="@Model.Konum" />
+    </div>
+
+    <div class="form-group">
+        <label for="Kategori">Kategori</label>
+        <input type="text" id="Kategori" name="Kategori" class="form-control" value="@Model.Kategori" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Güncelle</button>
+</form>

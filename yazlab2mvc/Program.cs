@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using yazlab2mvc.Models;
+using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,13 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;             // GDPR uyumu için gerekli iþaretleme
 });
 
+// **JSON Ayarlarý için ekleme**
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; // Döngüsel referanslar için
+    });
+
 // Build the application
 var app = builder.Build();
 
@@ -33,20 +43,15 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// **Session middleware ekle**
+app.UseSession(); // Burada session middleware'ini ekledik.
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-
-// **Session middleware ekle**
-app.UseSession();
-
-// Define default route
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapControllerRoute(
     name: "admin",
     pattern: "Admin/{action=Giris}/{id?}",

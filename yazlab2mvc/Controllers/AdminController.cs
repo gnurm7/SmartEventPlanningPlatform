@@ -39,8 +39,10 @@ public class AdminController : Controller
     // Admin panelinin ana sayfası (admin index)
     public IActionResult Index()
     {
-        return View(); // /Views/Admin/Index.cshtml'yi render eder
+        var etkinlikler = _context.Etkinlikler.ToList(); // Etkinlikleri listele
+        return View(etkinlikler); // Listeyi view'a gönder
     }
+
 
     // Kullanıcıları listele
     public IActionResult KullaniciListele()
@@ -52,7 +54,7 @@ public class AdminController : Controller
     // Kullanıcı detaylarını görüntüle
     public IActionResult KullaniciDetay(int id)
     {
-        
+
 
         var kullanici = _context.Kullanicilar.FirstOrDefault(k => k.ID == id); // Kullanıcıyı ID'ye göre al
         if (kullanici == null)
@@ -76,18 +78,98 @@ public class AdminController : Controller
     }
 
     // Etkinlikleri listele
-    public IActionResult EtkinlikListele()
+    public IActionResult EtkinlikListele(string durum)
     {
-        var etkinlikler = _context.Etkinlikler.ToList(); // Veritabanından etkinlikleri al
-        return View(etkinlikler); // Etkinlikleri view'a gönder
+        List<Etkinlikler> etkinlikler;
+
+        if (string.IsNullOrEmpty(durum))
+        {
+            etkinlikler = _context.Etkinlikler.ToList();  // Durum verilmemişse tüm etkinlikleri al
+        }
+        else
+        {
+            // Belirtilen duruma göre etkinlikleri filtrele
+            etkinlikler = _context.Etkinlikler.Where(e => e.EtkinlikDurumu == durum).ToList();
+        }
+
+        return View(etkinlikler); // Filtrelenmiş etkinlikleri view'a gönder
     }
+
+    // Etkinlik Güncelleme Action Method
+    [HttpGet]
+    public IActionResult EtkinlikGuncelle(int id)
+    {
+        var etkinlik = _context.Etkinlikler.FirstOrDefault(e => e.ID == id);
+        if (etkinlik == null)
+        {
+            return NotFound();
+        }
+        return View(etkinlik);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult EtkinlikGuncelle(Etkinlikler etkinlik)
+    {
+        //Burdaki errormodel yapısını global hale getirip sayfalarıda try catche alıp errorleri döndürebilirsin her sayfada basic olarak not olsun
+        //Silmicem zaten bide sen dene bakim bişeyler var mı sey eklicem su konumlar aarası mesefa ölcemyi bizim harita şeysinde var o ordan çek istersen
+        //Bişey lazım mı daha ? su anlık hayır :)) allah razı olsun iyi bi insana benzion kldsfjhklsdfg tamam bişi olursa yazarsın hadi ßß
+        
+        //if (!ModelState.IsValid)
+        //{
+        //    var errors = ModelState
+        //        .Where(x => x.Value.Errors.Count > 0)
+        //        .Select(x => new
+        //        {
+        //            PropertyName = x.Key,
+        //            Errors = x.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+        //        })
+        //        .ToArray();
+
+        //    foreach (var item in errors)
+        //    {
+        //        foreach (var errorMessage in item.Errors)
+        //        {
+        //            ViewBag.m1 += "Error in " + item.PropertyName + ": " + errorMessage + Environment.NewLine;
+        //        }
+        //    }
+
+        //    TempData["SuccessMessage"] = ViewBag.m1;
+        //    return View(etkinlik);
+        //}
+        var mevcutEtkinlik = _context.Etkinlikler.FirstOrDefault(e => e.ID == etkinlik.ID);
+
+        if (mevcutEtkinlik == null)
+        {
+            ViewBag.m1 = "Etkinlik Not Found!";
+            TempData["SuccessMessage"] = ViewBag.m1;
+            return View(etkinlik);//burda errorlü döndürmen lazım onuçözersin
+        }
+
+        // Etkinlik Durumu'nu güncelleme
+        mevcutEtkinlik.EtkinlikAdi = etkinlik.EtkinlikAdi;
+        mevcutEtkinlik.Aciklama = etkinlik.Aciklama;
+        mevcutEtkinlik.Tarih = etkinlik.Tarih;
+        mevcutEtkinlik.Saat = etkinlik.Saat;
+        mevcutEtkinlik.EtkinlikSuresi = etkinlik.EtkinlikSuresi;
+        mevcutEtkinlik.OlusturanKullaniciID = mevcutEtkinlik.OlusturanKullaniciID;
+        mevcutEtkinlik.Konum = etkinlik.Konum;
+        mevcutEtkinlik.Kategori = etkinlik.Kategori;
+        // Etkinlik Durumu'nu güncellemiyoruz
+
+        _context.Update(mevcutEtkinlik);
+        _context.SaveChanges();
+        TempData["SuccessMessage"] = "Etkinlik başarıyla güncellendi.";
+        return RedirectToAction("EtkinlikListele");
+    }
+
+
 
 
     // Etkinliği onayla
     [HttpPost]
     public IActionResult EtkinlikOnayla(int id)
     {
-        // Etkinliği Etkinlikler tablosunda bulalım
         var etkinlik = _context.Etkinlikler.FirstOrDefault(e => e.ID == id);
 
         if (etkinlik != null)
@@ -96,14 +178,13 @@ public class AdminController : Controller
             _context.SaveChanges(); // Değişiklikleri kaydet
         }
 
-        return RedirectToAction("EtkinlikListele"); // Etkinlikler listesine yönlendir
+        return RedirectToAction("EtkinlikListele", new { durum = "Onaylı" }); // Onaylı etkinlikleri göster
     }
 
     // Etkinliği reddet
     [HttpPost]
     public IActionResult EtkinlikRed(int id)
     {
-        // Etkinliği Etkinlikler tablosunda bulalım
         var etkinlik = _context.Etkinlikler.FirstOrDefault(e => e.ID == id);
 
         if (etkinlik != null)
@@ -112,8 +193,9 @@ public class AdminController : Controller
             _context.SaveChanges(); // Değişiklikleri kaydet
         }
 
-        return RedirectToAction("EtkinlikListele"); // Etkinlikler listesine yönlendir
+        return RedirectToAction("EtkinlikListele", new { durum = "Reddedildi" }); // Reddedilen etkinlikleri göster
     }
+
 
     // Etkinliği sil
     [HttpPost]
@@ -138,18 +220,20 @@ public class AdminController : Controller
         return RedirectToAction("EtkinlikListele"); // Etkinlikler listesine yönlendir
     }
 
-    // Katılımcıları listele
     public IActionResult KatilimciListele()
     {
         var katilimcilar = _context.Katilimcilar
-                                    .Include(k => k.Kullanici) // Kullanıcı bilgilerini dahil et
-                                    .Include(k => k.Etkinlik) // Etkinlik bilgilerini dahil et
-                                    .ToList(); // Verileri al
+                                    .Include(k => k.Kullanici)     // Kullanıcı bilgilerini dahil et
+                                    .Include(k => k.Etkinlik)      // Etkinlik bilgilerini dahil et
+                                    .ToList();                     // Katılımcıları al
 
-        return View(katilimcilar); // Katılımcıları view'a gönder
+        return View(katilimcilar);  // Katılımcıları View'a gönder
     }
 
-   
+
+
+
+
 
     // Katılımcıyı sil
     [HttpPost]

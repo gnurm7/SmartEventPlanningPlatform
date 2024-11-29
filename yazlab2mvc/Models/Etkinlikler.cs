@@ -22,17 +22,13 @@ namespace yazlab2mvc.Models
         public TimeSpan Saat { get; set; }
 
         public TimeSpan EtkinlikSuresi { get; set; }
-
-        public string EtkinlikDurumu { get; set; }
+         
         public string Konum { get; set; }
         public string Kategori { get; set; }
-
-        // Etkinliği oluşturan kullanıcı
-        public int OlusturanKullaniciID { get; set; }
         public virtual Kullanicilar OlusturanKullanici { get; set; }
-
-
-        public virtual ICollection<Katilimcilar> Katilimcilar { get; set; }
-        public virtual ICollection<Mesajlar> Mesajlar { get; set; }
+        public ICollection<Mesajlar> Mesajlar { get; set; } // Artık Required değil
+        public ICollection<Katilimcilar> Katilimcilar { get; set; } // Artık Required değil
+        public string EtkinlikDurumu { get; set; } // Artık Required değil
+        public int? OlusturanKullaniciID { get; set; } // Nullable
     }
 }

@@ -40,6 +40,15 @@ namespace yazlab2mvc.Controllers
             return View(puanlar);
         }
 
+        public IActionResult Harita()
+        {
+            // Etkinlikler tablosundaki tüm etkinlikleri çekiyoruz
+            var etkinlikler = _context.Etkinlikler
+                .Select(e => new { e.EtkinlikAdi, e.Konum }) // Sadece gerekli sütunları seçiyoruz
+                .ToList();
+
+            return View(etkinlikler); // View'a gönderiyoruz
+        }
 
 
         [HttpGet]
@@ -257,7 +266,6 @@ namespace yazlab2mvc.Controllers
 
             return View(etkinlikler); // View'da bu etkinlikleri göstereceğiz
         }
-        
 
         public IActionResult EtkinlikleriGoruntule()
         {
@@ -267,39 +275,88 @@ namespace yazlab2mvc.Controllers
             // Eğer kullanıcı ID'si null ise, giriş yapmamış demektir
             if (kullaniciID == null)
             {
-                // Kullanıcı giriş yapmamışsa, uygun bir yönlendirme veya hata mesajı ekleyebilirsiniz
+                // Kullanıcı giriş yapmamışsa, giriş yapma sayfasına yönlendirilir
                 return RedirectToAction("GirisYap", "Kullanici");
             }
 
-            // Katilimcilar tablosunda bu kullanıcının katılmadığı ve EtkinlikDurumu = "Onaylandı" olan etkinlikleri almak
-            var etkinlikler = _context.Etkinlikler
-                                    .Where(e => e.EtkinlikDurumu == "Onaylı" && // Sadece "Onaylandı" olan etkinlikler
-                                                !_context.Katilimcilar
-                                                    .Any(k => k.KullaniciID == kullaniciID && k.EtkinlikID == e.ID))
-                                    .ToList();
+            // Kullanıcının konumunu al
+            var kullanici = _context.Kullanicilar.FirstOrDefault(k => k.ID == kullaniciID);
+            if (kullanici == null || string.IsNullOrEmpty(kullanici.Konum))
+            {
+                // Eğer kullanıcı bulunamazsa veya konumu yoksa bir hata döndürebiliriz
+                TempData["Hata"] = "Kullanıcı konumu bulunamadı. Lütfen profilinizi güncelleyiniz.";
+                return RedirectToAction("ProfilGuncelle", "Kullanici");
+            }
 
+            // Kullanıcının konumunu ViewBag ile gönderiyoruz
+            ViewBag.KullaniciKonum = kullanici.Konum;
+
+            // Katılımcılar tablosunda bu kullanıcının katılmadığı ve EtkinlikDurumu = "Onaylı" olan etkinlikleri alıyoruz
+            var etkinlikler = _context.Etkinlikler
+                                      .Include(e => e.Katilimcilar) // Katılımcıları dahil et
+                                      .Where(e => e.EtkinlikDurumu == "Onaylı" && // Sadece onaylı etkinlikler
+                                                   !e.Katilimcilar.Any(k => k.KullaniciID == kullaniciID.Value)) // Kullanıcının katılmadığı etkinlikler
+                                      .ToList();
+
+            // Etkinlikleri View'e gönderiyoruz
             return View(etkinlikler);
         }
 
-
         public IActionResult KatildigimEtkinlikler()
         {
+            // Oturumdan Kullanıcı ID'sini al
             var kullaniciID = HttpContext.Session.GetInt32("KullaniciID");
 
+            // Eğer kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
             if (!kullaniciID.HasValue)
             {
-                return RedirectToAction("GirisYap", "Kullanici"); // Giriş yapmamış kullanıcıyı yönlendir
+                return RedirectToAction("Giris", "Admin"); // Giriş sayfasına yönlendir
             }
 
-            // Katılım durumu "Katılıyor" ve Etkinlik durumu "Onaylandı" olan etkinlikleri al
-            var etkinlikler = _context.Katilimcilar
-                                       .Where(k => k.KullaniciID == kullaniciID.Value &&
-                                                   k.Etkinlik.EtkinlikDurumu == "Onaylandı")
-                                       .Select(k => k.Etkinlik) // Katılım ile ilişkili etkinlikleri al
-                                       .ToList();
+            // Kullanıcının katıldığı etkinlikleri getir
+            var katildigiEtkinlikler = _context.Katilimcilar
+                                                .Include(k => k.Etkinlik) // Etkinlik bilgilerini dahil et
+                                                .Where(k => k.KullaniciID == kullaniciID.Value &&
+                                                            k.Etkinlik.EtkinlikDurumu == "Onaylı") // Yalnızca onaylı etkinlikler
+                                                .Select(k => k.Etkinlik) // Katılım ile ilişkili etkinlikleri seç
+                                                .ToList();
 
-            return View(etkinlikler); // Etkinlikleri View'e gönder
+            return View(katildigiEtkinlikler); // Kullanıcının katıldığı etkinlikleri View'e gönder
         }
+
+
+        //public IActionResult KatildigimEtkinlikler()
+        //{
+        //    // Oturumdan Kullanıcı ID'sini al
+        //    var kullaniciID = HttpContext.Session.GetInt32("KullaniciID");
+
+        //    // Eğer kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
+        //    if (!kullaniciID.HasValue)
+        //    {
+        //        return RedirectToAction("Giris", "Admin"); // Giriş sayfasına yönlendir
+        //    }
+
+        //    // Kullanıcının katıldığı etkinlikleri getir
+        //    var katildigiEtkinlikler = _context.Katilimcilar
+        //                                        .Include(k => k.Etkinlik) // Etkinlik bilgilerini dahil et
+        //                                        .Where(k => k.KullaniciID == kullaniciID.Value &&
+        //                                                    k.Etkinlik.EtkinlikDurumu == "Onaylı") // Yalnızca onaylı etkinlikler
+        //                                        .Select(k => k.Etkinlik) // Katılım ile ilişkili etkinlikleri seç
+        //                                        .ToList();
+
+        //    // Kullanıcının henüz katılmadığı etkinlikleri getir
+        //    var katilabilecegiEtkinlikler = _context.Etkinlikler
+        //                                             .Where(e => e.EtkinlikDurumu == "Onaylı" && // Yalnızca onaylı etkinlikler
+        //                                                         !_context.Katilimcilar
+        //                                                                  .Any(k => k.KullaniciID == kullaniciID.Value && k.EtkinlikID == e.ID)) // Kullanıcının katılmadıkları
+        //                                             .ToList();
+
+        //    // Katıldığı ve katılabileceği etkinlikleri birleştir
+        //    var tumEtkinlikler = katildigiEtkinlikler.Concat(katilabilecegiEtkinlikler).ToList();
+
+        //    return View(tumEtkinlikler); // Tüm etkinlikleri View'e gönder
+        //}
+
 
 
         [HttpGet]
