@@ -635,6 +635,76 @@ namespace yazlab2mvc.Controllers
             await _context.SaveChangesAsync();
 
         }
+        public IActionResult GecmisEtkinliklereGoreOnerme()
+        {
+            // Kullanıcı ID'sini session'dan al
+            var kullaniciID = HttpContext.Session.GetInt32("KullaniciID");
 
+            if (!kullaniciID.HasValue)
+            {
+                // Kullanıcı ID'si alınamadıysa, login sayfasına yönlendir
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Katıldığınız etkinlikleri alın
+            var katildigiEtkinlikler = _context.Katilimcilar
+                .Include(k => k.Etkinlik) // Etkinlik bilgilerini dahil et
+                .Where(k => k.KullaniciID == kullaniciID.Value && k.Etkinlik.EtkinlikDurumu == "Onaylı") // Yalnızca onaylı etkinlikler
+                .Select(k => k.Etkinlik) // Katılım ile ilişkili etkinlikleri seç
+                .ToList();
+
+            // Katıldığınız etkinliklerin kategorilerini al
+            var katildiginizKategoriler = katildigiEtkinlikler
+                .Select(e => e.Kategori) // Her etkinliğin kategorisini al
+                .Distinct() // Kategoriler tekrarlanmamalı
+                .ToList();
+
+            if (katildiginizKategoriler.Count == 0)
+            {
+                TempData["Hata"] = "Katıldığınız etkinlikler bulunamadı.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Kategorilere göre önerilen etkinlikleri alın
+            var onerilenEtkinlikler = _context.Etkinlikler
+                .Where(e => katildiginizKategoriler.Contains(e.Kategori) && e.EtkinlikDurumu == "Onaylı") // Kategorilere göre filtrele
+                .Where(e => !katildigiEtkinlikler.Contains(e)) // Katıldığınız etkinlikleri hariç tutun
+                .ToList();
+
+            // Eğer önerilen etkinlik yoksa, kullanıcıya bilgi ver
+            if (onerilenEtkinlikler.Count == 0)
+            {
+                TempData["Hata"] = "Yeni önerilen etkinlik bulunamadı.";
+            }
+
+            return View(onerilenEtkinlikler); // View'da önerilen etkinlikleri göster
+        }
+
+        //ilgi alanına göre
+        public IActionResult OnerilenEtkinlikler()
+        {
+            // Kullanıcının ilgi alanlarını almak
+            var kullaniciIlgiAlanlari = _context.Kullanicilar
+                .Where(k => k.ID == HttpContext.Session.GetInt32("KullaniciID"))
+                .Select(k => k.IlgiAlanlari)
+                .FirstOrDefault();
+
+            if (string.IsNullOrEmpty(kullaniciIlgiAlanlari))
+            {
+                // Eğer ilgi alanları boşsa, uygun bir mesaj verebiliriz.
+                TempData["Hata"] = "İlgi alanlarınız boş. Lütfen profilinizi güncelleyiniz.";
+                return RedirectToAction("ProfilGuncelle", "Kullanici");
+            }
+
+            // İlgi alanlarını virgülle ayırarak bir listeye dönüştürmek
+            var ilgiAlanlariListesi = kullaniciIlgiAlanlari.Split(',').Select(i => i.Trim()).ToList();
+
+            // Etkinlikleri filtrelemek
+            var etkinlikler = _context.Etkinlikler
+                .Where(e => ilgiAlanlariListesi.Contains(e.Kategori))
+                .ToList();
+
+            return View(etkinlikler);
+        }
     }
 }

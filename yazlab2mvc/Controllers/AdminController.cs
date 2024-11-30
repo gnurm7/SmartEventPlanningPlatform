@@ -64,18 +64,31 @@ public class AdminController : Controller
         return View(kullanici); // Kullanıcıyı view'a gönder
     }
 
-    // Kullanıcıyı sil
     [HttpPost]
     public IActionResult KullaniciSil(int id)
     {
         var kullanici = _context.Kullanicilar.FirstOrDefault(k => k.ID == id);
+
         if (kullanici != null)
         {
-            _context.Kullanicilar.Remove(kullanici); // Kullanıcıyı veritabanından sil
-            _context.SaveChanges(); // Değişiklikleri kaydet
+            // Kullanıcıya ait mesajları sil
+            var mesajlar = _context.Mesajlar.Where(m => m.AliciID == id).ToList();
+            if (mesajlar.Any())
+            {
+                _context.Mesajlar.RemoveRange(mesajlar); // Mesajları sil
+            }
+
+            // Kullanıcıyı sil
+            _context.Kullanicilar.Remove(kullanici);
+
+            // Değişiklikleri kaydet
+            _context.SaveChanges();
         }
-        return RedirectToAction("KullaniciListele"); // Kullanıcılar listesine yönlendir
+
+        // Kullanıcılar listesine yönlendir
+        return RedirectToAction("KullaniciListele");
     }
+
 
     // Etkinlikleri listele
     public IActionResult EtkinlikListele(string durum)

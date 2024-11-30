@@ -1,0 +1,32 @@
+﻿@model List<Etkinlikler>
+
+<h2>Önerilen Etkinlikler</h2>
+
+@if (Model.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Etkinlik Adı</th>
+                <th>Etkinlik Tarihi</th>
+                <th>Etkinlik Saati</th>
+                <th>Konum</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var etkinlik in Model)
+            {
+                <tr>
+                    <td>@etkinlik.EtkinlikAdi</td>
+                    <td>@etkinlik.Tarih.ToString("dd MMMM yyyy")</td>
+                    <td>@etkinlik.Saat.ToString(@"hh\:mm")</td>
+                    <td>@etkinlik.Konum</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>İlgi alanlarınıza uygun etkinlik bulunamadı.</p>
+}

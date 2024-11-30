@@ -58,4 +58,15 @@ app.MapControllerRoute(
     defaults: new { controller = "Admin" }
 );
 
+//app.MapControllerRoute(
+//    name: "etkinlik",
+//    pattern: "Etkinlik/{action=EtkinlikOnerileri}/{userId?}",
+//    defaults: new { controller = "Etkinlik" }
+//);
+app.MapControllerRoute(
+    name: "etkinlik",
+    pattern: "Kullanici/{action=EtkinlikOnerileri}/{userId?}",
+    defaults: new { controller = "Etkinlik" }
+);
+
 app.Run();
