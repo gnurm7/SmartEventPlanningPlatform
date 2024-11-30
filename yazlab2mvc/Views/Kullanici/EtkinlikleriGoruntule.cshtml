@@ -67,23 +67,28 @@
 
         etkinlikler.$values.forEach(etkinlik => {
             const etkinlikID = etkinlik.ID;
-            console.log("e:"+etkinlik.EtkinlikAdi);
-            console.log("E"+etkinlik.etkinlikAdi);
-            if (etkinlik.konum) {
 
+
+            if (etkinlik.konum) {
                 const [lat, lng] = etkinlik.konum.split(',').map(Number);
+                const sanitizedTitle = etkinlik.etkinlikAdi.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
                 const marker = new google.maps.Marker({
                     position: { lat: lat, lng: lng },
                     map: map,
-                    title: etkinlik.etkinlikAdi,// etkinlik adi ama hepsinde yine e oluyo
+                    title: sanitizedTitle,
                 });
 
+                console.log("E" + etkinlik.etkinlikAdi);
+
+                // Her marker için ayrı bir InfoWindow oluştur
                 const infoWindow = new google.maps.InfoWindow({
                     content: `<div><strong>${etkinlik.etkinlikAdi}</strong></div>`,
                 });
 
+                // Marker'a tıklanınca ilgili InfoWindow'u aç
                 marker.addListener("click", () => {
-                    infoWindow.open(map, marker);
+                    infoWindow.open(map, marker,sanitizedTitle);
                 });
 
                 if (kullaniciKonum) {
