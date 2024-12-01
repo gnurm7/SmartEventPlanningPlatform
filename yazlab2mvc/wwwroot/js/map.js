@@ -4,7 +4,7 @@
         zoom: 10
     });
 
-    // Haritaya tıklayınca pin ekleme
+    
     map.addListener("click", (e) => {
         new google.maps.Marker({
             position: e.latLng,

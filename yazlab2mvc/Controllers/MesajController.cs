@@ -18,16 +18,16 @@ namespace yazlab2mvc.Controllers
         {
             var mesajlar = _context.Mesajlar
                 .Where(m => m.EtkinlikID == etkinlikID)
-                .Include(m => m.Gonderici) // Gönderen kullanıcı bilgisi
+                .Include(m => m.Gonderici) 
                 .Select(m => new
                 {
-                    GondericiAdi = m.Gonderici.Ad + " " + m.Gonderici.Soyad, // Gönderen kullanıcı adı ve soyadı
+                    GondericiAdi = m.Gonderici.Ad + " " + m.Gonderici.Soyad, 
                     MesajMetni = m.MesajMetni,
                     GonderimZamani = m.GonderimZamani
                 })
                 .ToList();
 
-            return Json(mesajlar); // Mesajları JSON formatında döndür
+            return Json(mesajlar); 
         }
 
 

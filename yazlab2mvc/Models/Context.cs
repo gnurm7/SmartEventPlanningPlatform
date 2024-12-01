@@ -22,14 +22,14 @@ namespace yazlab2mvc.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Birleşik anahtarları belirtin
+            
             modelBuilder.Entity<Katilimcilar>()
                 .HasKey(k => new { k.KullaniciID, k.EtkinlikID });
 
             modelBuilder.Entity<Puanlar>()
                 .HasKey(p => new { p.KullaniciID, p.KazanilanTarih });
 
-            // Kullanıcı-Gönderilen ve Alınan Mesajlar ilişkisi
+           
             modelBuilder.Entity<Mesajlar>()
                 .HasOne(m => m.Gonderici)
                 .WithMany(k => k.GonderilenMesajlar)
@@ -54,7 +54,7 @@ namespace yazlab2mvc.Models
     .HasOne(e => e.OlusturanKullanici)
     .WithMany(u => u.OlusturduguEtkinlikler)
     .HasForeignKey(e => e.OlusturanKullaniciID)
-    .OnDelete(DeleteBehavior.SetNull); // Veya .OnDelete(DeleteBehavior.NoAction)
+    .OnDelete(DeleteBehavior.SetNull);
 
 
         }

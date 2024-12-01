@@ -10,7 +10,7 @@
                 <th>Etkinlik Adı</th>
                 <th>Etkinlik Tarihi</th>
                 <th>Etkinlik Konumu</th>
-                <th>İşlem</th> <!-- Yeni kolon ekledik -->
+                <th>İşlem</th> 
             </tr>
         </thead>
         <tbody>
@@ -21,7 +21,7 @@
                     <td>@etkinlik.Tarih.ToString("dd MMMM yyyy")</td>
                     <td>@etkinlik.Konum</td>
                     <td>
-                        <!-- Mesaj gönder butonunu ekledik -->
+                      
                         <button class="btn btn-primary" onclick="window.location.href='@Url.Action("MesajGonder", "Kullanici", new { etkinlikID = etkinlik.ID })'">Mesaj Gönder</button>
                     </td>
                 </tr>

@@ -1,5 +1,42 @@
 ﻿@model List<yazlab2mvc.Models.Etkinlikler>
 
+<head>
+    <style>
+       
+        table th {
+            background-color: #4CAF50; 
+            color: white; 
+        }
+
+       
+        table td {
+            color: white; 
+        }
+
+           
+            table td:first-child {
+                color: white; 
+            }
+
+     
+        button {
+            background-color: #6a0dad; 
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+
+        
+        #route-info p {
+            color: #333; 
+        }
+
+    </style>
+</head>
+
 <!--<h2>@ViewBag.KullaniciKonum</h2>-->
 <h2>Katılabileceğiniz Etkinlikler</h2>
 
@@ -103,7 +140,7 @@
 
                     const userLatLng = new google.maps.LatLng(userLat, userLng);
                     const etkinlikLatLng = new google.maps.LatLng(lat, lng);
-                    //burdak tekrar hesaplanıo die olabilir mi content değişmiyor fakat hesap yapsada content niye değişsin
+                  
                     const travelModes = ['DRIVING', 'BICYCLING', 'WALKING'];
 
                     travelModes.forEach(mode => {
@@ -120,20 +157,20 @@
                                 const route = result.routes[0];
                                 const duration = route.legs[0].duration.text;
                                 const distance = route.legs[0].distance.text;
-                                // Tabloyu güncelle: Mesafeyi her etkinlik için yazdır
+                               
                                 const distanceElement = document.getElementById(`distance-${etkinlikLatLng}`);
                                 console.log(`${mode} ile Rota:`);
                                 console.log(`Mesafe: ${distance}, Süre: ${duration}`);
 
-                                // Update the HTML with the route information for DRIVING mode
+                               
                                 if (mode === 'DRIVING') {
                                     document.getElementById("route-distance").textContent = `Mesafe: ${distance}`;
                                     document.getElementById("route-duration").textContent = `Süre: ${duration}`;
                                     if (distanceElement) {
-                                        distanceElement.innerHTML += "<br>Sürüş Mesafe: " + distance + "<br>Sürüş Süresi : " + duration;//Brleri new line yaparsın ona üşendim işte anladın mantığını
+                                        distanceElement.innerHTML += "<br>Sürüş Mesafe: " + distance + "<br>Sürüş Süresi : " + duration;
                                     } else { console.log("YOk=distance-" + etkinlikLatLng); }
                                 }
-                                // Update the HTML with the route information for DRIVING mode
+                                
                                 if (mode === 'WALKING') {
                                     document.getElementById("route-distance").textContent = `Mesafe: ${distance}`;
                                     document.getElementById("route-duration").textContent = `Süre: ${duration}`;
@@ -141,7 +178,7 @@
                                         distanceElement.innerHTML += "<br>Yürüme Mesafe: " + distance + "<br>Yürüme Süresi : " + duration;
                                     } else { console.log("YOk=distance-" + etkinlikLatLng); }
                                 }
-                                if (mode === 'BICYCLING') {//Biliyom biliyomda hesaplayıp bulursa o mesafeyi burda yazdır diye hazırlıyom işte bak dur bi
+                                if (mode === 'BICYCLING') {
                                     document.getElementById("route-distance").textContent = `Mesafe: ${distance}`;
                                     document.getElementById("route-duration").textContent = `Süre: ${duration}`;
                                     if (distanceElement) {
@@ -149,7 +186,7 @@
                                     } else { console.log("YOk=distance-" + etkinlikLatLng); }
                                 }
 
-                                const contentString =/*Buraya html olarak verdiğin her şey çalışır okee baska bi sey sorim mi... sora*/
+                                const contentString =
                                 '<div id="content">' +
                                 '<div id="siteNotice">' +
                                 "</div>" +

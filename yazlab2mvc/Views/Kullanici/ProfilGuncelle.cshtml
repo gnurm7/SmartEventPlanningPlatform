@@ -29,13 +29,13 @@
 </form>
 
 @section Scripts {
-    <!-- Google Maps API -->
+   
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFXDO-G5xsoSOXpV0F-MLfOZ6_qBXHCFw&callback=initMap" async defer></script>
 
     <script>
-        // Haritayı başlatma
+       
         function initMap() {
-            // İstanbul koordinatları (varsayılan başlangıç)
+           
             const map = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: 41.0082, lng: 28.9784 },
                 zoom: 10,
@@ -43,10 +43,10 @@
 
             let marker;
 
-            // Haritaya tıklayınca marker ekleme ve konumu inputa yazma
+           
             map.addListener("click", (e) => {
                 if (marker) {
-                    marker.setMap(null); // Önceki marker'ı kaldır
+                    marker.setMap(null); 
                 }
 
                 marker = new google.maps.Marker({
@@ -54,7 +54,7 @@
                     map: map,
                 });
 
-                // Konumu inputa yaz
+                
                 document.getElementById("konum").value = `${e.latLng.lat()}, ${e.latLng.lng()}`;
             });
         }
