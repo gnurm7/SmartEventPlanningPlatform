@@ -1,6 +1,6 @@
 ﻿@model List<yazlab2mvc.Models.Etkinlikler>
 
-<h2>@ViewBag.KullaniciKonum</h2>
+<!--<h2>@ViewBag.KullaniciKonum</h2>-->
 <h2>Katılabileceğiniz Etkinlikler</h2>
 
 <div id="map" style="height: 500px; width: 100%;"></div>
@@ -36,14 +36,15 @@
                     </td>
                 </tr>
             }
+
         </tbody>
     </table>
 }
-
 <div id="route-info">
     <p id="route-distance"></p>
     <p id="route-duration"></p>
 </div>
+
 
 <script>
     const kullaniciKonum = "@ViewBag.KullaniciKonum";
@@ -67,39 +68,19 @@
 
         etkinlikler.$values.forEach(etkinlik => {
             const etkinlikID = etkinlik.ID;
-
-
             if (etkinlik.konum) {
                 const [lat, lng] = etkinlik.konum.split(',').map(Number);
-                const sanitizedTitle = etkinlik.etkinlikAdi.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
                 const marker = new google.maps.Marker({
                     position: { lat: lat, lng: lng },
                     map: map,
-                    title: sanitizedTitle,
+                    title: "",
                 });
-
-                console.log("E" + etkinlik.etkinlikAdi);
-
-                // Her marker için ayrı bir InfoWindow oluştur
-                const infoWindow = new google.maps.InfoWindow({
-                    content: `<div><strong>${etkinlik.etkinlikAdi}</strong></div>`,
-                });
-
-                // Marker'a tıklanınca ilgili InfoWindow'u aç
-                marker.addListener("click", () => {
-                    infoWindow.open(map, marker,sanitizedTitle);
-                });
-
                 if (kullaniciKonum) {
                     const [userLat, userLng] = kullaniciKonum.split(',').map(Number);
                     const userLatLng = new google.maps.LatLng(userLat, userLng);
                     const etkinlikLatLng = new google.maps.LatLng(lat, lng);
 
                     const distance = google.maps.geometry.spherical.computeDistanceBetween(userLatLng, etkinlikLatLng) / 1000;
-
-                    infoWindow.setContent(`<div><strong>${etkinlik.etkinlikAdi}</strong><br>Mesafe: ${distance} km</div>`);
-
                     const path = [userLatLng, etkinlikLatLng];
                     const polyline = new google.maps.Polyline({
                         path: path,
@@ -110,9 +91,11 @@
                     });
                     polyline.setMap(map);
                 }
-
-                // Rota hesaplama işlemi
-                if (kullaniciKonum) {
+                
+                // Rota hesaplama
+                if (kullaniciKonum) 
+                {
+                    //Burda bi yerde markerı değiştiriyorsun
                     const [userLat, userLng] = kullaniciKonum.split(',').map(Number);
                     const directionsService = new google.maps.DirectionsService();
                     const directionsRenderer = new google.maps.DirectionsRenderer();
@@ -120,7 +103,7 @@
 
                     const userLatLng = new google.maps.LatLng(userLat, userLng);
                     const etkinlikLatLng = new google.maps.LatLng(lat, lng);
-
+                    //burdak tekrar hesaplanıo die olabilir mi content değişmiyor fakat hesap yapsada content niye değişsin
                     const travelModes = ['DRIVING', 'BICYCLING', 'WALKING'];
 
                     travelModes.forEach(mode => {
@@ -132,6 +115,7 @@
 
                         directionsService.route(request, (result, status) => {
                             if (status === 'OK') {
+                                directionsRenderer.setOptions({ suppressMarkers: true });
                                 directionsRenderer.setDirections(result);
                                 const route = result.routes[0];
                                 const duration = route.legs[0].duration.text;
@@ -164,12 +148,30 @@
                                         distanceElement.innerHTML += "<br>Bisiklet Mesafe: " + distance + "<br>Bisikler Süresi : " + duration;
                                     } else { console.log("YOk=distance-" + etkinlikLatLng); }
                                 }
+
+                                const contentString =/*Buraya html olarak verdiğin her şey çalışır okee baska bi sey sorim mi... sora*/
+                                '<div id="content">' +
+                                '<div id="siteNotice">' +
+                                "</div>" +
+                                '<h1 id="firstHeading" class="firstHeading">'+etkinlik.etkinlikAdi+'</h1>' +
+                                '<div id="bodyContent">' +"<strong>Mesafe: "+distance+" km</strong>"+
+                                "</div>" +
+                                "</div>";
+                                 marker["infowindow"]= new google.maps.InfoWindow({
+                                     title:"contentString",
+                                    content:contentString,
+                                });
+
+                                marker.addListener('click', function() {
+                                    marker["infowindow"].open(map, this);
+                                });
                             } else {
                                 console.error(`Rota hesaplanamadı: ${status}`);
                             }
+
                         });
                     });
-                }
+                } 
             }
         });
     }

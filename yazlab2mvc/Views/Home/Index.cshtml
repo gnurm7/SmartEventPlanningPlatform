@@ -2,18 +2,56 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #2e004f; /* Arka plan rengi */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Dikey ortalama */
+            align-items: center; /* Yatay ortalama */
+            height: 100vh; /* Sayfa yüksekliği */
+            font-family: Arial, sans-serif; /* Yazı tipi */
+        }
 
-    <!-- Kayıt Ol ve Giriş Yap bağlantıları -->
-    <p>
-        Henüz hesabınız yok mu? <a asp-controller="Kullanici" asp-action="KayitOl">Kayıt Ol</a>
-    </p>
-    <p>
-        Zaten hesabınız var mı? <a asp-controller="Kullanici" asp-action="GirisYap">Giriş Yap</a>
-    </p>
-    <p>
-        Admin Giris <a asp-controller="Admin" asp-action="Giris">Admingiris</a>
-    </p>
-</div>
+        h1.display-4 {
+            margin-bottom: 110px; /* Başlık altındaki boşluk */
+            font-size: 3rem;
+        }
+
+        p {
+            margin: 10px 0; /* Paragraflar arası boşluk */
+        }
+
+        a {
+            color: lightblue;
+            text-decoration: none; /* Alt çizgiyi kaldırır */
+        }
+
+        a:hover {
+            text-decoration: underline; /* Üzerine gelindiğinde alt çizgi ekler */
+        }
+    </style>
+</head>
+<body>
+    <div class="text-center">
+        <h1 class="display-4">HOSGELDİNİZ</h1>
+
+        <!-- Kayıt Ol ve Giriş Yap bağlantıları -->
+        <p>
+            Henüz hesabınız yok mu? <a asp-controller="Kullanici" asp-action="KayitOl">Kayıt Ol</a>
+        </p>
+        <p>
+            Zaten hesabınız var mı? <a asp-controller="Kullanici" asp-action="GirisYap">Giriş Yap</a>
+        </p>
+    </div>
+</body>
+</html>

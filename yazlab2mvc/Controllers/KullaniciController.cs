@@ -85,7 +85,7 @@ namespace yazlab2mvc.Controllers
         [HttpPost]
         public async Task<IActionResult> KayitOl(Kullanicilar kullanici)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid)// Hayır o öyle değil bu zaten hepsini validate ediyor ama senin bi bugın  var burda onu biz çalışsın diye böyle yapmıştık kaldır direkt hoca sorarsa trycatch var dersin tmm deniyim sey bi kaç seye daha bakalım
             {
                 try
                 {
@@ -99,27 +99,42 @@ namespace yazlab2mvc.Controllers
                         // Seçilen ilgi alanlarını virgülle birleştir
                         kullanici.IlgiAlanlari = string.Join(", ", ilgiAlanlari);
                     }
-
+                    System.Diagnostics.Debug.WriteLine("IF"+ Request.Form.Files.Count);
+                    Console.WriteLine("IF"+ Request.Form.Files.Count);
                     if (Request.Form.Files.Count > 0)
                     {
-                        var file = Request.Form.Files[0]; // İlk dosyayı al
-                        string dosyaAdi = Path.GetFileName(file.FileName);
-                        string uzanti = Path.GetExtension(file.FileName);
-                        string yeniDosyaAdi = Guid.NewGuid().ToString() + uzanti; // Benzersiz bir isim oluştur
-                        string yol = Path.Combine("wwwroot/Image", yeniDosyaAdi); // Dosya kaydedilecek yol
-
-                        using (var stream = new FileStream(yol, FileMode.Create))
+                        System.Diagnostics.Debug.WriteLine("TRY");
+                        Console.WriteLine("TRY");
+                        try
                         {
-                            await file.CopyToAsync(stream); // Dosyayı fiziksel olarak kaydet
+                            var file = Request.Form.Files[0]; // İlk dosyayı al
+                            string dosyaAdi = Path.GetFileName(file.FileName);
+                            string uzanti = Path.GetExtension(file.FileName);
+                            string yeniDosyaAdi = Guid.NewGuid().ToString() + uzanti; // Benzersiz bir isim oluştur
+                            string yol = Path.Combine("wwwroot/Image", yeniDosyaAdi); // Dosya kaydedilecek yol
+
+                            using (var stream = new FileStream(yol, FileMode.Create))
+                            {
+                                await file.CopyToAsync(stream); // Dosyayı fiziksel olarak kaydet
+                            }
+
+                            kullanici.ProfilFotografi = "/Image/" + yeniDosyaAdi; // Veri tabanına kaydedilecek yol
+                            System.Diagnostics.Debug.WriteLine("Hata Yok:" + yol);
+                            Console.WriteLine("Hata Yok:" + yol);
                         }
-
-                        kullanici.ProfilFotografi = "/Image/" + yeniDosyaAdi; // Veri tabanına kaydedilecek yol
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine("Hata:" + ex.Message);
+                            Console.WriteLine("Hata:" + ex.Message);
+                        }
+                        
                     }
-
+                    System.Diagnostics.Debug.WriteLine("ENDIF"+ Request.Form.Files.Count);
+                    Console.WriteLine("ENDIF"+ Request.Form.Files.Count);
                     _context.Kullanicilar.Add(kullanici); // Veritabanına kaydet
                     await _context.SaveChangesAsync();
                     TempData["Message"] = "Kayıt başarılı!";
-                    return RedirectToAction("KayitOl");
+                    return RedirectToAction("GirisYap");
                 }
                 catch (Exception)
                 {
@@ -153,11 +168,6 @@ namespace yazlab2mvc.Controllers
 
             return View(); // Kullanıcı arayüzüne yönlendir
         }
-
-
-
-
-
         // POST: Kullanici/GirisYap
         [HttpPost]
         public IActionResult GirisYap(string kullaniciAdi, string sifre)
@@ -512,7 +522,11 @@ namespace yazlab2mvc.Controllers
                 ViewBag.IsSuccess = false;
                 return View();
             }
+      
+             yeniSifre = Sifreleme.sifrele(yeniSifre,"kkkk1234");
+            kullanici.Sifre = yeniSifre;
 
+           
             // Yeni şifreyi güncelliyoruz
             kullanici.Sifre = yeniSifre;
 

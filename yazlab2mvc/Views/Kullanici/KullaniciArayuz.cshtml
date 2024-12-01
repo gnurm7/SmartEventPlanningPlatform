@@ -1,31 +1,42 @@
-﻿@{
-    var kullaniciAdi = ViewData["KullaniciAdi"] as string; // ViewData'dan kullanıcı adını al
-}
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etkinlik Yönetim Paneli</title>
+    <link rel="stylesheet" href="~/css/style.css">
+</head>
+<body>
+    @{
+        var kullaniciAdi = ViewData["KullaniciAdi"] as string; // ViewData'dan kullanıcı adını al
+    }
 
-<h2>Merhaba, @kullaniciAdi</h2>
+    <h2 class="header">Merhaba, @kullaniciAdi</h2>
 
-@if (TempData["Message"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Message"]
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Message"]
+        </div>
+    }
+
+
+    <div class="sidebar">
+        <ul>
+            <li><a href="@Url.Action("Profil", "Kullanici")">Profilim</a></li>
+            <li><a href="@Url.Action("Puanlar", "Kullanici")">Puan Geçmişim</a></li>
+            <li><a href="@Url.Action("EtkinlikOlustur", "Kullanici")">Etkinlik Oluştur</a></li>
+            <li><a href="@Url.Action("KatildigimEtkinlikler", "Kullanici")">Katıldığım Etkinlikler</a></li>
+            <li><a href="@Url.Action("EtkinlikleriGoruntule", "Kullanici")">Katılabilecegim Etkinlikleri Görüntüle(EtkinlikleriGoruntule)</a></li>
+            <li><a href="@Url.Action("OnayBekleyenEtkinlikler", "Kullanici")">Onay Bekleyen Etkinlikler</a></li>
+            <li><a href="@Url.Action("ReddedilenEtkinlikler", "Kullanici")">Reddedilen Etkinlikler</a></li>
+            <li><a href="@Url.Action("OnerilenEtkinlikler", "Kullanici")">İlgi Alanına Göre Önerilen Etkinlikler</a></li>
+            <li><a href="@Url.Action("GecmisEtkinliklereGoreOnerme", "Kullanici")">Gecmis Etkinliklere Göre Önerilen Etkinlikler</a></li>
+        </ul>
     </div>
-}
 
 
-<div class="sidebar">
-    <ul>
-        <li><a href="@Url.Action("Profil", "Kullanici")">Profilim</a></li>
-        <li><a href="@Url.Action("Puanlar", "Kullanici")">Puan Geçmişim</a></li>
-        <li><a href="@Url.Action("EtkinlikOlustur", "Kullanici")">Etkinlik Oluştur</a></li>
-        <li><a href="@Url.Action("KatildigimEtkinlikler", "Kullanici")">Katıldığım Etkinlikler</a></li>
-        <li><a href="@Url.Action("EtkinlikleriGoruntule", "Kullanici")">Katılabilecegim Etkinlikleri Görüntüle(EtkinlikleriGoruntule)</a></li>
-        <li><a href="@Url.Action("OnayBekleyenEtkinlikler", "Kullanici")">Onay Bekleyen Etkinlikler</a></li>
-        <li><a href="@Url.Action("ReddedilenEtkinlikler", "Kullanici")">Reddedilen Etkinlikler</a></li>
-        <li><a href="@Url.Action("OnerilenEtkinlikler", "Kullanici")">İlgi Alanına Göre Önerilen Etkinlikler</a></li>
-        <li><a href="@Url.Action("GecmisEtkinliklereGoreOnerme", "Kullanici")">Gecmis Etkinliklere Göre Önerilen Etkinlikler</a></li>
-    </ul>
-</div>
-
-<!-- Kullanıcı arayüzü için içerik alanı -->
-<div class="content">
-</div>
+    <div class="content">
+    </div>
+</body>
+</html>

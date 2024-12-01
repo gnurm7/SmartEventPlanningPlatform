@@ -1,5 +1,6 @@
 ﻿@model yazlab2mvc.Models.Kullanicilar
 
+<link rel="stylesheet" href="~/css/style.css">
 <h2>Profilim</h2>
 
 <div>
@@ -8,7 +9,7 @@
     <p><strong>Email:</strong> @Model.Eposta</p>
     <p><strong>Telefon:</strong> @Model.TelefonNumarasi</p>
     <p><strong>Konum:</strong> @Model.Konum</p>
-
+ 
     @if (!string.IsNullOrEmpty(Model.IlgiAlanlari))
     {
         <p><strong>İlgi Alanları:</strong></p>

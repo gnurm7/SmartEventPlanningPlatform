@@ -15,13 +15,15 @@
     <textarea asp-for="Aciklama" class="form-control"></textarea>
 
     <label>Tarih:</label>
-    <input asp-for="Tarih" type="date" class="form-control" />
+    <input asp-for="Tarih" type="date" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+
 
     <label>Saat:</label>
     <input asp-for="Saat" type="time" class="form-control" />
 
     <label>Süre:</label>
-    <input asp-for="EtkinlikSuresi" type="time" class="form-control" />
+    <input asp-for="EtkinlikSuresi" type="number" class="form-control" min="1" max="7" step="1" />
+
 
     <label>Konum:</label>
     <input asp-for="Konum" id="konum" class="form-control" readonly />
@@ -66,8 +68,9 @@
             });
 
             let marker;
+            const geocoder = new google.maps.Geocoder();
 
-            // Haritaya tıklayınca marker ekleme ve konumu inputa yazma
+            // Haritaya tıklayınca marker ekleme ve adresi tam olarak bulma
             map.addListener("click", (e) => {
                 if (marker) {
                     marker.setMap(null); // Önceki marker'ı kaldır
@@ -78,11 +81,29 @@
                     map: map,
                 });
 
-                // Konumu inputa yaz
-                document.getElementById("konum").value = `${e.latLng.lat()}, ${e.latLng.lng()}`;
+                // Adresi bul ve tam adres formatında yaz
+                geocoder.geocode({ location: e.latLng }, (results, status) => {
+                    if (status === "OK" && results[0]) {
+                        const address = results[0].address_components;
+                        console.log(address);
+                        // İl, ilçe, mahalle ve ülke bilgilerini ayrıştır
+                        let mahalle = address.find(c => c.types.includes("neighborhood") || c.types.includes("sublocality") || c.types.includes("locality"))?.long_name || "";
+                        let ilce = address.find(c => c.types.includes("administrative_area_level_2"))?.long_name || "";
+                        let il = address.find(c => c.types.includes("administrative_area_level_1"))?.long_name || "";
+                        let ulke = address.find(c => c.types.includes("country"))?.long_name || "";
 
+                        // Tam adresi oluştur
+                        const fullAddress = `${mahalle ? mahalle + ", " : ""}${ilce}, ${il}, ${ulke}`;
+
+                        // Input alanına yaz
+                        document.getElementById("konum").value = fullAddress;
+                    } else {
+                        alert("Tam adres bulunamadı.");
+                    }
+                });
             });
         }
-
     </script>
 }
+
+
